@@ -1,8 +1,9 @@
 
-import { Document, Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 // 1. Create an interface representing a document in MongoDB.
-interface IUser extends Document{
+export interface IUser{
+    _id: Types.ObjectId;
     email: string;
     password: string;
     first_name: string;
@@ -11,7 +12,7 @@ interface IUser extends Document{
         "fish" | "panda" | "whale" | "prawn" | "bee" |
         "hellokitty" | "chicken" | "elephant" |
         "teddybear" | "dolphin";
-    tokens: string[];
+    refreshTokens: string[];
 }
 
 // 2. Create a Schema corresponding to the document interface.
@@ -46,7 +47,7 @@ const userSchema = new Schema<IUser>({
             "teddybear", "dolphin"],
         default: "panda",
     },
-    tokens: {
+    refreshTokens: {
         type: [String],
         default: [],
     }

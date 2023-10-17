@@ -21,13 +21,12 @@ import authRouter from './routes/auth';
 // Database
 import mongoose from 'mongoose';
 mongoose.set("strictQuery", false);
-const mongoDB = process.env.MONGODB_URI;
+const mongoDB = process.env.DB_CONNECTION_URL;
 main().catch((err) => console.log(err));
 async function main() {
     await mongoose.connect(mongoDB!);
     console.log(`Connected to MongoDB`);
 }
-
 
 // Middleware
 const corsOptions = {
@@ -52,4 +51,4 @@ httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });
 
-// module.exports = app;
+export default app;
