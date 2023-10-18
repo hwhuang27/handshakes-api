@@ -1,33 +1,98 @@
+import { CookieOptions } from 'express';
+import createError from 'http-errors';
+import asyncHandler from 'express-async-handler';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User, { IUser } from '../models/User';
 import { body, validationResult } from 'express-validator';
-import asyncHandler from 'express-async-handler';
+import User, { IUser } from '../models/User';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const ACCESS_TOKEN_KEY = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_KEY = process.env.REFRESH_TOKEN_SECRET;
 
-interface jwtUser {
+interface jwtEncoded {
     email: string,
     first_name: string,
     last_name: string,
     avatar: string,
 }
 
-function generateAccessToken(payload: jwtUser){
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '30s'});
+interface jwtDecoded {
+    email: string,
+    first_name: string,
+    last_name: string,
+    avatar: string,
+    iat: number,
+    exp: number,
 }
 
-function generateRefreshToken(payload: jwtUser){
+const cookieOptions: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+}
+
+function generateAccessToken(payload: jwtEncoded){
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '10m'});
+}
+
+function generateRefreshToken(payload: jwtEncoded){
     return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '7d'});
 }
+
 export const handle_refresh = [
     asyncHandler(async (req, res, next) => {
-        const refreshToken = req.body.token;
+        const refreshToken = req.cookies.token;
+        if(!refreshToken){
+            const err = createError(401, `Token not found`);
+            return next(err);
+        }
 
+        // check if refresh token exists in database
+        const result = await User.findOne({ refreshTokens: refreshToken });
+        if(!result) {
+            const err = createError(403, `Invalid token`);
+            return next(err);
+        }
+
+        next();
+    }),
+    asyncHandler(async (req, res, next) => {
+        const refreshToken = req.cookies.token;
+        try {
+            // check if token is valid
+            const user = jwt.verify(refreshToken, REFRESH_TOKEN_KEY!) as jwtDecoded;
+
+            // token is valid, create new access token for user
+            const payload: jwtEncoded = {
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                avatar: user.avatar,
+            }
+            const accessToken = generateAccessToken(payload);
+
+            res.json({
+                success: true,
+                message: `New access token created`,
+                accessToken: accessToken,
+            })
+        } catch (error) {
+            // remove expired token from database & clear cookies
+            await User.findOneAndUpdate(
+                { refreshTokens: refreshToken },
+                { $pull: { refreshTokens: refreshToken } }
+            )
+            res.clearCookie('token', cookieOptions);
+
+            res.status(403).json({
+                success: false,
+                error: error,
+            })
+        }
     })
 ];
 
@@ -38,26 +103,38 @@ export const handle_login = [
     }),
     
     asyncHandler(async (req, res, next) => {
+        // get user from request
         const user = req.user as IUser;
 
-        const payload: jwtUser = {
+        const payload: jwtEncoded = {
             email: user.email,
             first_name: user.first_name,
             last_name: user.last_name,
             avatar: user.avatar,
         }
 
+        // generate access and refresh tokens with user payload
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
 
+        // push refresh token to database user
+        await User.findByIdAndUpdate(user._id, {
+            $push: { refreshTokens: refreshToken},
+        });
+
+        // send refresh token to client through HttpOnly cookie
+        res.cookie('token', refreshToken, cookieOptions);
+        
+        // send access token to client for temporary access
         res.json({
+            success: true,
             accessToken: accessToken,
-            refreshToken: refreshToken,
         });
     }),
 ];
 
 export const handle_register = [
+    // validate form fields
     body("email")
         .trim()
         .isLength({ min: 1 })
@@ -65,9 +142,7 @@ export const handle_register = [
         .withMessage("Email must be specified.")
         .custom(async (value) => {
             const user = await User.findOne({email: value});
-            if(user){
-                throw new Error('Email is already in use');
-            }
+            if(user) throw new Error('Email is already in use');
         }),
     body("password")
         .trim()
@@ -95,6 +170,7 @@ export const handle_register = [
     asyncHandler(async (req, res, next) => {
             const errors = validationResult(req);
 
+            // check for any validation errors
             if(!errors.isEmpty()){
                 res.status(400).json({
                     message: `Error when registering`,
@@ -102,6 +178,7 @@ export const handle_register = [
                     errors: errors.array(),
                 });
             } else {
+                // hash password and save user to database
                 bcrypt.hash(req.body.password, 10, async(err, hash) => {
                     if (err) throw new Error(`Password failed to hash.`);
                     
@@ -111,8 +188,7 @@ export const handle_register = [
                         first_name: req.body.first_name,
                         last_name: req.body.last_name,
                     })
-
-                    let result = await user.save();
+                    await user.save();
 
                     res.status(200).json({
                         message: `User created successfully.`,

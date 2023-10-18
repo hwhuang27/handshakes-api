@@ -1,8 +1,9 @@
 import 'dotenv/config';
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -22,6 +23,7 @@ import authRouter from './routes/auth';
 import mongoose from 'mongoose';
 mongoose.set("strictQuery", false);
 const mongoDB = process.env.DB_CONNECTION_URL;
+
 main().catch((err) => console.log(err));
 async function main() {
     await mongoose.connect(mongoDB!);
@@ -40,12 +42,27 @@ app.use(compression());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(passport.initialize());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
+app.use(passport.initialize());
 
-app.use('/auth', cors(corsOptions), authRouter);
-// app.use('/api', cors(corsOptions), apiRouter);
+app.use('/auth', authRouter);
+// app.use('/api', apiRouter);
+
+// Error Handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    // Log error to console
+    console.log(`Error: ${err.message}`);
+    console.error(err.stack);
+
+    // Send error response
+    res.status(err.status || 400).json({
+        success: false,
+        error: err.message || `Something went wrong`,
+    })
+});
 
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
