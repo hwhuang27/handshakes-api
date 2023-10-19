@@ -1,46 +1,24 @@
-import { CookieOptions } from 'express';
 import createError from 'http-errors';
 import asyncHandler from 'express-async-handler';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
-import User, { IUser } from '../models/User';
 import dotenv from 'dotenv';
 dotenv.config();
+
+import User, { IUser } from '../models/User';
+import { jwtDecoded, jwtEncoded, cookieOptions } from '../auth/jwtConfig';
 
 const ACCESS_TOKEN_KEY = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_KEY = process.env.REFRESH_TOKEN_SECRET;
 
-interface jwtEncoded {
-    email: string,
-    first_name: string,
-    last_name: string,
-    avatar: string,
+export function generateAccessToken(payload: jwtEncoded) {
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '10m' });
 }
 
-interface jwtDecoded {
-    email: string,
-    first_name: string,
-    last_name: string,
-    avatar: string,
-    iat: number,
-    exp: number,
-}
-
-const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-}
-
-function generateAccessToken(payload: jwtEncoded){
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '10m'});
-}
-
-function generateRefreshToken(payload: jwtEncoded){
-    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '7d'});
+export function generateRefreshToken(payload: jwtEncoded) {
+    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '7d' });
 }
 
 export const handle_refresh = [
