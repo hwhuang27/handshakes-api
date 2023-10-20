@@ -14,65 +14,12 @@ const ACCESS_TOKEN_KEY = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_KEY = process.env.REFRESH_TOKEN_SECRET;
 
 export function generateAccessToken(payload: jwtEncoded) {
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '10m' });
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '15m' });
 }
 
 export function generateRefreshToken(payload: jwtEncoded) {
     return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '7d' });
 }
-
-export const handle_refresh = [
-    asyncHandler(async (req, res, next) => {
-        const refreshToken = req.cookies.token;
-        if(!refreshToken){
-            const err = createError(401, `Token not found`);
-            return next(err);
-        }
-
-        // check if refresh token exists in database
-        const result = await User.findOne({ refreshTokens: refreshToken });
-        if(!result) {
-            const err = createError(403, `Invalid token`);
-            return next(err);
-        }
-
-        next();
-    }),
-    asyncHandler(async (req, res, next) => {
-        const refreshToken = req.cookies.token;
-        try {
-            // check if token is valid
-            const user = jwt.verify(refreshToken, REFRESH_TOKEN_KEY!) as jwtDecoded;
-
-            // token is valid, create new access token for user
-            const payload: jwtEncoded = {
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                avatar: user.avatar,
-            }
-            const accessToken = generateAccessToken(payload);
-
-            res.json({
-                success: true,
-                message: `New access token created`,
-                accessToken: accessToken,
-            })
-        } catch (error) {
-            // remove expired token from database & clear cookies
-            await User.findOneAndUpdate(
-                { refreshTokens: refreshToken },
-                { $pull: { refreshTokens: refreshToken } }
-            )
-            res.clearCookie('token', cookieOptions);
-
-            res.status(403).json({
-                success: false,
-                error: error,
-            })
-        }
-    })
-];
 
 export const handle_login = [
     passport.authenticate('local', {
@@ -101,7 +48,7 @@ export const handle_login = [
         });
 
         // send refresh token to client through HttpOnly cookie
-        res.cookie('token', refreshToken, cookieOptions);
+        res.cookie('jwt', refreshToken, cookieOptions);
         
         // send access token to client for temporary access
         res.json({
@@ -111,6 +58,79 @@ export const handle_login = [
     }),
 ];
 
+export const handle_logout = [
+    asyncHandler(async (req, res, next) => {
+        const refreshToken = req.cookies.jwt;
+
+        // remove token from database & clear cookies
+        await User.findOneAndUpdate(
+            { refreshTokens: refreshToken },
+            { $pull: { refreshTokens: refreshToken } }
+        )
+        res.clearCookie('jwt', cookieOptions);
+
+        res.json({
+            success: true,
+            message: `Successfully logged out.`,
+        })
+    })
+];
+
+export const handle_refresh = [
+    asyncHandler(async (req, res, next) => {
+        const refreshToken = req.cookies.jwt;
+        if (!refreshToken) {
+            const err = createError(401, `Token not found`);
+            return next(err);
+        }
+
+        // check if refresh token exists in database
+        const result = await User.findOne({ refreshTokens: refreshToken });
+        if (!result) {
+            const err = createError(403, `Invalid token`);
+            return next(err);
+        }
+
+        next();
+    }),
+    asyncHandler(async (req, res, next) => {
+        const refreshToken = req.cookies.jwt;
+        try {
+            // check if token is valid
+            const user = jwt.verify(refreshToken, REFRESH_TOKEN_KEY!) as jwtDecoded;
+
+            // token is valid, create new access token for user
+            const payload: jwtEncoded = {
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                avatar: user.avatar,
+            }
+            const accessToken = generateAccessToken(payload);
+
+            res.json({
+                success: true,
+                message: `New access token created`,
+                accessToken: accessToken,
+            })
+        } catch (error) {
+            // remove expired token from database & clear cookies
+            await User.findOneAndUpdate(
+                { refreshTokens: refreshToken },
+                { $pull: { refreshTokens: refreshToken } }
+            )
+            res.clearCookie('jwt', cookieOptions);
+
+            res.status(403).json({
+                success: false,
+                error: error,
+            })
+        }
+    })
+];
+
+
+ 
 export const handle_register = [
     // validate form fields
     body("email")
@@ -148,7 +168,7 @@ export const handle_register = [
     asyncHandler(async (req, res, next) => {
             const errors = validationResult(req);
 
-            // check for any validation errors
+            // check for validation errors
             if(!errors.isEmpty()){
                 res.status(400).json({
                     message: `Error when registering`,
@@ -176,6 +196,5 @@ export const handle_register = [
             }
     }),
 ];
-
 
 

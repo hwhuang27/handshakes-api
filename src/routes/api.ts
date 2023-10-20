@@ -1,9 +1,12 @@
 
 import express from 'express';
-// import userController from "../controllers/userController";
-// import roomController from "../controllers/roomController";
+import passport from 'passport';
+import * as userController from '../controllers/userController';
 
 const router = express.Router();
 
+router.get('/user', 
+    passport.authenticate('jwt', { session: false }),
+    userController.profile);
 
 export default router;

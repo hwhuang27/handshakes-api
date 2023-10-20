@@ -9,7 +9,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
 import { createServer } from 'http';
-import './auth/passportLocal';
+import './auth/localStrategy';
+import './auth/jwtStrategy';
 
 const app = express();
 const httpServer = createServer(app);
@@ -17,7 +18,7 @@ const httpServer = createServer(app);
 const port = process.env.PORT || 3000;
 
 import authRouter from './routes/auth';
-// import apiRouter from './routes/api';
+import apiRouter from './routes/api';
 
 // Database
 import mongoose from 'mongoose';
@@ -49,7 +50,7 @@ app.use(cors(corsOptions));
 app.use(passport.initialize());
 
 app.use('/auth', authRouter);
-// app.use('/api', apiRouter);
+app.use('/api', apiRouter);
 
 // Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
