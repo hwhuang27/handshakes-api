@@ -14,14 +14,14 @@ const ACCESS_TOKEN_KEY = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_KEY = process.env.REFRESH_TOKEN_SECRET;
 
 export function generateAccessToken(payload: jwtEncoded) {
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '15m' });
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '30m' });
 }
 
 export function generateRefreshToken(payload: jwtEncoded) {
-    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '7d' });
+    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '30d' });
 }
 
-export const handle_login = [
+export const login = [
     passport.authenticate('local', {
         failureRedirect: '/auth/loginFailure',
         session: false,
@@ -58,7 +58,7 @@ export const handle_login = [
     }),
 ];
 
-export const handle_logout = [
+export const logout = [
     asyncHandler(async (req, res, next) => {
         const refreshToken = req.cookies.jwt;
 
@@ -76,7 +76,7 @@ export const handle_logout = [
     })
 ];
 
-export const handle_refresh = [
+export const refresh = [
     asyncHandler(async (req, res, next) => {
         const refreshToken = req.cookies.jwt;
         if (!refreshToken) {
@@ -131,7 +131,7 @@ export const handle_refresh = [
 
 
  
-export const handle_register = [
+export const register = [
     // validate form fields
     body("email")
         .trim()

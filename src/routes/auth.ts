@@ -4,11 +4,11 @@ import * as authController from "../controllers/authController";
 
 const router = express.Router();
 
-router.post('/register', authController.handle_register);
-router.post('/login', authController.handle_login);
-router.post('/logout', authController.handle_logout);
+router.post('/register', authController.register);
+router.post('/login', authController.login);
+router.post('/logout', authController.logout);
 
-router.get('/refresh', authController.handle_refresh);
+router.get('/refresh', authController.refresh);
 
 router.get('/loginFail', (req, res) => {
     res.status(401).json({

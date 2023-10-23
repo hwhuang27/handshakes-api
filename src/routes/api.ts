@@ -7,6 +7,11 @@ const router = express.Router();
 
 router.get('/user', 
     passport.authenticate('jwt', { session: false }),
-    userController.profile);
+    userController.user);
+
+router.get('/users', 
+    passport.authenticate('jwt', { session: false }),
+    userController.users);
+
 
 export default router;
