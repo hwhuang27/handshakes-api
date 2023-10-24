@@ -3,9 +3,9 @@ import { Types, Schema, model  } from 'mongoose';
 import { DateTime } from 'luxon'; 
 
 // 1. Create an interface representing a document in MongoDB.
-interface IMessage{
+export interface IMessage{
     user: Types.ObjectId;
-    text: string;
+    message: string;
     timestamp: Date;
 }
 
@@ -16,7 +16,7 @@ const messageSchema = new Schema<IMessage>({
         ref: "User",
         required: true,
     },
-    text: {
+    message: {
         type: String,
         required: true,
         maxLength: 500,

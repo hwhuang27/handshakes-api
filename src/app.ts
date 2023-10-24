@@ -9,11 +9,13 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
 import { createServer } from 'http';
+import { Server } from 'socket.io';
 import './auth/localStrategy';
 import './auth/jwtStrategy';
 
 const app = express();
 const httpServer = createServer(app);
+const io = new Server(httpServer);
 
 const port = process.env.PORT || 3000;
 
@@ -64,6 +66,17 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
         error: err.message || `Something went wrong`,
     })
 });
+
+io.on('connection', (socket) => {
+    socket.on('chat message', (msg) => {
+        io.emit('chat message', msg);
+    });
+
+    // socket.on('chat message', (msg) => {
+    //     console.log(`message: ${msg}`);
+    // });
+}); 
+
 
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

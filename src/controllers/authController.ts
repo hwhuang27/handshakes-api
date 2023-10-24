@@ -129,8 +129,6 @@ export const refresh = [
     })
 ];
 
-
- 
 export const register = [
     // validate form fields
     body("email")

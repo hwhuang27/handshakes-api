@@ -1,11 +1,12 @@
 import asyncHandler from 'express-async-handler';
+import { body, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 dotenv.config();
 
 import { jwtEncoded, jwtDecoded } from '../auth/jwtConfig';
 import User from '../models/User';
 
-export const user = [
+export const fetch_user = [
     asyncHandler(async (req, res, next) => {
         const user = req.user as jwtDecoded;
 
@@ -23,7 +24,45 @@ export const user = [
     })
 ];
 
-export const users = [
+export const edit_user = [
+    body("first_name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("First name must be specified."),
+    body("last_name")
+        .trim()
+        .isLength({ min: 1 })
+        .escape()
+        .withMessage("Last name must be specified."),
+
+    asyncHandler(async (req, res, next) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            res.status(400).json({
+                message: `Error editing profile`,
+                errors: errors.array(),
+            });
+        } else {
+            const user = req.user as jwtDecoded;
+
+            await User.updateOne(
+                { email: user.email }, 
+                { 
+                    first_name: req.body.first_name, 
+                    last_name: req.body.last_name, 
+                    avatar: req.body.avatar
+                });
+
+            res.status(200).json({
+                message: `User updated successfully.`
+            });
+        }
+    })
+];
+
+export const fetch_users = [
     asyncHandler(async (req, res, next) => {
         const user = req.user as jwtDecoded;
 
