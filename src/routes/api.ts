@@ -21,14 +21,9 @@ router.get('/users',
     passport.authenticate('jwt', { session: false }),
     userController.fetch_users);
 
-// post message with socket io
-router.post('/messages',
+// fetch chat with user, or create new one if none exists
+router.post('/chat/:userId',
     passport.authenticate('jwt', { session: false }),
-    chatController.send_message);
-
-// fetch all messages with socket io
-router.get('/messages',
-    passport.authenticate('jwt', { session: false }),
-    chatController.fetch_messages);
-
+    chatController.fetch_chat);
+    
 export default router;

@@ -32,6 +32,7 @@ export const login = [
         const user = req.user as IUser;
 
         const payload: jwtEncoded = {
+            _id: user._id.toString(),
             email: user.email,
             first_name: user.first_name,
             last_name: user.last_name,
@@ -101,6 +102,7 @@ export const refresh = [
 
             // token is valid, create new access token for user
             const payload: jwtEncoded = {
+                _id: user._id,
                 email: user.email,
                 first_name: user.first_name,
                 last_name: user.last_name,

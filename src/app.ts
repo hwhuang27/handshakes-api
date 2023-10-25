@@ -13,6 +13,10 @@ import { Server } from 'socket.io';
 import './auth/localStrategy';
 import './auth/jwtStrategy';
 
+import User, { IUser } from './models/User';
+import Message, { IMessage } from './models/Message';
+import Room, { IRoom } from './models/Room';
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
@@ -68,13 +72,16 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 io.on('connection', (socket) => {
+    console.log(socket.id);
+    
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
     });
 
-    // socket.on('chat message', (msg) => {
-    //     console.log(`message: ${msg}`);
-    // });
+    socket.on('create room', (userId) => {
+        
+    });
+
 }); 
 
 

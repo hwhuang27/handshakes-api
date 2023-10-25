@@ -1,6 +1,7 @@
 import { CookieOptions } from 'express';
 
 export interface jwtEncoded {
+    _id?: string,
     email: string,
     first_name: string,
     last_name: string,
@@ -8,6 +9,7 @@ export interface jwtEncoded {
 }
 
 export interface jwtDecoded {
+    _id: string,
     email: string,
     first_name: string,
     last_name: string,

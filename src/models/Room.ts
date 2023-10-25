@@ -1,13 +1,13 @@
 import { Types, Schema, model } from 'mongoose';
 
 // 1. Create an interface representing a document in MongoDB.
-interface IChatroom {
+export interface IRoom {
     users: Types.ObjectId[];
     messages: Types.ObjectId[];
 }
 
 // 2. Create a Schema corresponding to the document interface.
-const chatroomSchema = new Schema<IChatroom>({
+const roomSchema = new Schema<IRoom>({
     users: [
         {
             type: Schema.Types.ObjectId,
@@ -23,6 +23,6 @@ const chatroomSchema = new Schema<IChatroom>({
 });
 
 // 3. Create a Model.
-const Chatroom = model<IChatroom>('Chatroom', chatroomSchema);
+const Room = model<IRoom>('Room', roomSchema);
 
-export default Chatroom;
+export default Room;
