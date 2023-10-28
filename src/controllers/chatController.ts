@@ -24,7 +24,9 @@ export const fetch_chat = [
                 path: 'users',
                 select: ["first_name", "last_name", "avatar"],
             })
-            // populate messages later
+            .populate({
+                path: 'messages',
+            })
 
         if(!room){
             const newRoom = new Room({

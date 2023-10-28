@@ -12,10 +12,13 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import './auth/localStrategy';
 import './auth/jwtStrategy';
+import { ACCESS_TOKEN_KEY, jwtDecoded } from './auth/jwtConfig';
 
 import User, { IUser } from './models/User';
 import Message, { IMessage } from './models/Message';
 import Room, { IRoom } from './models/Room';
+import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 const app = express();
 const httpServer = createServer(app);
@@ -71,19 +74,35 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     })
 });
 
-io.on('connection', (socket) => {
-    console.log(socket.id);
-    
-    socket.on('chat message', (msg) => {
+// Socket IO
+io.use((socket, next) => {
+    // jwt authorization middleware
+    if(socket.handshake.query && socket.handshake.query.token){
+        const accessToken = socket.handshake.query.token as string;
+        jwt.verify(accessToken, ACCESS_TOKEN_KEY!, (err, decoded) => {
+            if(err) return next(new Error('Authentication error'));
+            socket.data = decoded;
+            next();
+        });
+    }
+    else {
+        next(new Error('Authentication error'));
+    }
+})
+.on('connection', (socket) => {
+    const data = socket.data;
+    const userId = socket.data._id;
+
+    socket.on('chat message', async (msg) => {
+        const message = new Message({
+            user: new Types.ObjectId(userId),
+            message: msg,
+        });
+        await message.save();
+
         io.emit('chat message', msg);
     });
-
-    socket.on('create room', (userId) => {
-        
-    });
-
 }); 
-
 
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

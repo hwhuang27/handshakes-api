@@ -8,10 +8,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import User, { IUser } from '../models/User';
-import { jwtDecoded, jwtEncoded, cookieOptions } from '../auth/jwtConfig';
+import { 
+    jwtDecoded, 
+    jwtEncoded, 
+    cookieOptions,
+    ACCESS_TOKEN_KEY, 
+    REFRESH_TOKEN_KEY 
+} from '../auth/jwtConfig';
 
-const ACCESS_TOKEN_KEY = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_TOKEN_KEY = process.env.REFRESH_TOKEN_SECRET;
+
 
 export function generateAccessToken(payload: jwtEncoded) {
     return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '30m' });
