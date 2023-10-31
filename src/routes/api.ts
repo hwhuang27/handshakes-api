@@ -1,8 +1,7 @@
-
 import express from 'express';
 import passport from 'passport';
 import * as userController from '../controllers/userController';
-import * as chatController from '../controllers/chatController';
+// import * as chatController from '../controllers/chatController';
 
 const router = express.Router();
 
@@ -21,9 +20,10 @@ router.get('/users',
     passport.authenticate('jwt', { session: false }),
     userController.fetch_users);
 
-// fetch chat with user, or create new one if none exists
-router.post('/chat/:userId',
-    passport.authenticate('jwt', { session: false }),
-    chatController.fetch_chat);
-    
+// // fetch chat with user, or create new one if none exists
+// router.post('/chat/:userId',
+//     passport.authenticate('jwt', { session: false }),
+//     chatController.fetch_chat);
+
+
 export default router;

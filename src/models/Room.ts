@@ -2,6 +2,7 @@ import { Types, Schema, model } from 'mongoose';
 
 // 1. Create an interface representing a document in MongoDB.
 export interface IRoom {
+    _id: Types.ObjectId;
     users: Types.ObjectId[];
     messages: Types.ObjectId[];
 }

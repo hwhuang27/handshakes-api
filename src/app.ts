@@ -90,22 +90,42 @@ io.use((socket, next) => {
     }
 })
 .on('connection', (socket) => {
-    const data = socket.data;
     const userId = socket.data._id;
+    console.log(`User ${socket.data.first_name} ${socket.data.last_name} connected.`);
 
-    socket.on('chat message', async (msg) => {
-        const message = new Message({
-            user: new Types.ObjectId(userId),
-            message: msg,
-        });
-        await message.save();
+    // hit a certain endpoint in client-side to join room with roomId
+    socket.on('join room', (roomId) => {
+        if(socket.rooms.size > 1){
+            // change socket.rooms from Set to Array and grab the 2nd element
+            const prevRoomId = [...socket.rooms][1];
+            socket.leave(prevRoomId);
+        }
 
-        io.emit('chat message', msg);
+        socket.join(roomId);
     });
+
+    socket.on('private message', async (text, roomId) => {
+        // const message = new Message({
+        //     toUser: new Types.ObjectId(receiverId),
+        //     fromUser: new Types.ObjectId(userId),
+        //     message: text,
+        // });
+        // await message.save();
+
+        socket.to(roomId).emit('private message', {
+            message: text,
+            from: userId,
+        });
+    });
+    
+    // socket.onAny((eventName, ...args) => {
+    //     console.log(`Event name: ${eventName}`);
+    //     console.log(`Arguments: ${args}`);
+    // });
 }); 
 
 httpServer.listen(port, () => {
-    console.log(`[server]: Server is running at http://localhost:${port}`);
+    console.log(`[server]: Server running at http://localhost:${port}`);
 });
 
 export default app;

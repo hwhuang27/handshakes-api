@@ -9,8 +9,9 @@ dotenv.config();
 import { Types } from 'mongoose';
 import User, { IUser } from '../models/User';
 import Message, { IMessage } from '../models/Message';
-import Room, { IRoom } from '../models/Room';
 import { jwtDecoded } from '../auth/jwtConfig';
+
+import Room, { IRoom } from '../models/Room';
 
 export const fetch_chat = [
     asyncHandler(async (req, res, next) => {
