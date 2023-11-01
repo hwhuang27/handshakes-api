@@ -30,7 +30,6 @@ export const login = [
         failureRedirect: '/auth/loginFailure',
         session: false,
     }),
-    
     asyncHandler(async (req, res, _next) => {
         // get user from request
         const user = req.user as IUser;
