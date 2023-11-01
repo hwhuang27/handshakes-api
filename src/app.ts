@@ -90,7 +90,7 @@ io.use((socket, next) => {
     }
 })
 .on('connection', (socket) => {
-    const userId = socket.data._id;
+    const myId = socket.data._id;
     console.log(`User ${socket.data.first_name} ${socket.data.last_name} connected.`);
 
     // hit a certain endpoint in client-side to join room with roomId
@@ -104,17 +104,23 @@ io.use((socket, next) => {
         socket.join(roomId);
     });
 
-    socket.on('private message', async (text, roomId) => {
-        // const message = new Message({
-        //     toUser: new Types.ObjectId(receiverId),
-        //     fromUser: new Types.ObjectId(userId),
-        //     message: text,
-        // });
-        // await message.save();
-
-        socket.to(roomId).emit('private message', {
+    socket.on('private message', async (text, roomId, userId) => {
+        const message = new Message({
+            toUser: new Types.ObjectId(userId),
+            fromUser: new Types.ObjectId(myId),
             message: text,
-            from: userId,
+        });
+        await message.save();
+
+        await Room.updateOne(
+            { _id: roomId}, 
+            { $push: { messages: message }},
+        );
+
+        // send data to frontend to display real-time message
+        socket.to(roomId).emit('display message', {
+            message: text,
+            from: myId,
         });
     });
     

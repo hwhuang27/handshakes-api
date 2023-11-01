@@ -16,11 +16,12 @@ import Room, { IRoom } from '../models/Room';
 export const fetch_chat = [
     asyncHandler(async (req, res, next) => {
         const user = req.user as jwtDecoded;
-        const userId = new Types.ObjectId(user._id);
-        const receiverId = new Types.ObjectId(req.params.userId);
+        const myId = new Types.ObjectId(user._id);
+        const userId = new Types.ObjectId(req.params.userId);
 
+        // fetch existing room
         const room = await Room
-            .findOne({ users: [userId, receiverId]})
+            .findOne({ users: [myId, userId]})
             .populate({
                 path: 'users',
                 select: ["first_name", "last_name", "avatar"],
@@ -29,9 +30,10 @@ export const fetch_chat = [
                 path: 'messages',
             })
 
+        // make a new room if none exists
         if(!room){
             const newRoom = new Room({
-                users: [userId, receiverId],
+                users: [myId, userId],
                 messages: [],
             })
             await newRoom.save();
