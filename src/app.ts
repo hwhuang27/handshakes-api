@@ -9,14 +9,13 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import './auth/localStrategy';
 import './auth/jwtStrategy';
-import { ACCESS_TOKEN_KEY, jwtDecoded } from './auth/jwtConfig';
+import { ACCESS_TOKEN_KEY } from './auth/jwtConfig';
 
-import User, { IUser } from './models/User';
-import Message, { IMessage } from './models/Message';
-import Room, { IRoom } from './models/Room';
+import Message from './models/Message';
+import Room from './models/Room';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
 
@@ -62,7 +61,7 @@ app.use('/auth', authRouter);
 app.use('/api', apiRouter);
 
 // Error Handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     // Log error to console
     console.log(`Error: ${err.message}`);
     console.error(err.stack);
@@ -71,11 +70,11 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(err.status || 400).json({
         success: false,
         error: err.message || `Something went wrong`,
-    })
+    });
 });
 
 // Socket IO
-io.use((socket, next) => {
+io.use((socket: Socket, next) => {
     // jwt authorization middleware
     if(socket.handshake.query && socket.handshake.query.token){
         const accessToken = socket.handshake.query.token as string;
@@ -89,20 +88,20 @@ io.use((socket, next) => {
         next(new Error('Authentication error'));
     }
 })
-.on('connection', (socket) => {
-    const myId = socket.data._id;
+.on('connection', (socket: Socket) => {
+    const myId = socket.data._id as string;
     console.log(`User ${socket.data.first_name} ${socket.data.last_name} connected.`);
 
-    socket.on('join room', (roomId) => {
+    socket.on('join room', async (roomId: string) => {
         if(socket.rooms.size > 1){
-            // change socket.rooms from Set to Array and grab 2nd element (current room)
+            // change socket.rooms from Set to Array and grab 2nd element (current user)
             const prevRoomId = [...socket.rooms][1];
-            socket.leave(prevRoomId);
+            await socket.leave(prevRoomId);
         }
-        socket.join(roomId);
+        await socket.join(roomId);
     });
 
-    socket.on('private message', async (text, roomId, userId) => {
+    socket.on('private message', async (text: string, roomId: string, userId: string) => {
         const message = new Message({
             toUser: new Types.ObjectId(userId),
             fromUser: new Types.ObjectId(myId),

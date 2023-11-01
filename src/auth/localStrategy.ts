@@ -13,7 +13,7 @@ const verify: VerifyFunction = async (email, password, done) => {
         const user = await User.findOne({ email: email});
         if(!user){
             return done(null, false, { message: `Incorrect email or password`});
-        };
+        }
         
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
@@ -24,6 +24,6 @@ const verify: VerifyFunction = async (email, password, done) => {
     } catch(err) {
         return done(err, false, { message: `Authentication failed`});
     }
-}
+};
 
 passport.use(new LocalStrategy(options, verify));

@@ -7,7 +7,7 @@ import { jwtEncoded, jwtDecoded } from '../auth/jwtConfig';
 import User from '../models/User';
 
 export const fetch_user = [
-    asyncHandler(async (req, res, next) => {
+    asyncHandler((req, res, _next) => {
         const user = req.user as jwtDecoded;
 
         const result: jwtEncoded = {
@@ -15,7 +15,7 @@ export const fetch_user = [
             first_name: user.first_name,
             last_name: user.last_name,
             avatar: user.avatar,
-        }
+        };
 
         res.status(200).json({
             success: true,
@@ -36,7 +36,7 @@ export const edit_user = [
         .escape()
         .withMessage("Last name must be specified."),
 
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
@@ -63,7 +63,7 @@ export const edit_user = [
 ];
 
 export const fetch_users = [
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
         const user = req.user as jwtDecoded;
 
         // returns all users minus current user
@@ -74,6 +74,6 @@ export const fetch_users = [
         res.status(200).json({
             success: true,
             users: users,
-        })
+        });
     })
 ];

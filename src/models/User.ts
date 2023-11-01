@@ -1,4 +1,3 @@
-
 import { Schema, model, Types } from 'mongoose';
 
 // 1. Create an interface representing a document in MongoDB.

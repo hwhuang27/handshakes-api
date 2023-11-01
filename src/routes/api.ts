@@ -25,5 +25,4 @@ router.post('/chat/:userId',
     passport.authenticate('jwt', { session: false }),
     chatController.fetch_chat);
 
-
 export default router;

@@ -31,7 +31,7 @@ export const login = [
         session: false,
     }),
     
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
         // get user from request
         const user = req.user as IUser;
 
@@ -41,7 +41,7 @@ export const login = [
             first_name: user.first_name,
             last_name: user.last_name,
             avatar: user.avatar,
-        }
+        };
 
         // generate access and refresh tokens with user payload
         const accessToken = generateAccessToken(payload);
@@ -64,25 +64,25 @@ export const login = [
 ];
 
 export const logout = [
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
         const refreshToken = req.cookies.jwt;
 
         // remove token from database & clear cookies
         await User.findOneAndUpdate(
             { refreshTokens: refreshToken },
             { $pull: { refreshTokens: refreshToken } }
-        )
+        );
         res.clearCookie('jwt', cookieOptions);
 
         res.json({
             success: true,
             message: `Successfully logged out.`,
-        })
+        });
     })
 ];
 
 export const refresh = [
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, _res, next) => {
         const refreshToken = req.cookies.jwt;
         if (!refreshToken) {
             const err = createError(401, `Token not found`);
@@ -98,7 +98,7 @@ export const refresh = [
 
         next();
     }),
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
         const refreshToken = req.cookies.jwt;
         try {
             // check if token is valid
@@ -111,26 +111,26 @@ export const refresh = [
                 first_name: user.first_name,
                 last_name: user.last_name,
                 avatar: user.avatar,
-            }
+            };
             const accessToken = generateAccessToken(payload);
 
             res.json({
                 success: true,
                 message: `New access token created`,
                 accessToken: accessToken,
-            })
+            });
         } catch (error) {
             // remove expired token from database & clear cookies
             await User.findOneAndUpdate(
                 { refreshTokens: refreshToken },
                 { $pull: { refreshTokens: refreshToken } }
-            )
+            );
             res.clearCookie('jwt', cookieOptions);
 
             res.status(403).json({
                 success: false,
                 error: error,
-            })
+            });
         }
     })
 ];
@@ -169,7 +169,7 @@ export const register = [
         .escape()
         .withMessage("Last name must be specified."),
 
-    asyncHandler(async (req, res, next) => {
+    asyncHandler(async (req, res, _next) => {
             const errors = validationResult(req);
 
             // check for validation errors
@@ -189,13 +189,13 @@ export const register = [
                         password: hash,
                         first_name: req.body.first_name,
                         last_name: req.body.last_name,
-                    })
+                    });
                     await user.save();
 
                     res.status(200).json({
                         message: `User created successfully.`,
                         user,
-                    })
+                    });
                 });
             }
     }),
