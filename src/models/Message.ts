@@ -3,7 +3,6 @@ import { DateTime } from 'luxon';
 
 // 1. Create an interface representing a document in MongoDB.
 export interface IMessage{
-    toUser: Types.ObjectId;
     fromUser: Types.ObjectId;
     message: string;
     timestamp: Date;
@@ -11,11 +10,6 @@ export interface IMessage{
 
 // 2. Create a Schema corresponding to the document interface.
 const messageSchema = new Schema<IMessage>({
-    toUser: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },    
     fromUser: {
         type: Schema.Types.ObjectId,
         ref: "User",

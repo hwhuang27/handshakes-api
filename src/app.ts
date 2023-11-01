@@ -41,22 +41,21 @@ async function main() {
 
 // Middleware
 const corsOptions = {
-    // add for frontend after: e.g. ('https://bookshelf-client-eight.vercel.app')
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: ['http://localhost:5173', 'http://localhost:3000', 'https://messenger-client-liard.vercel.app'],
     optionsSuccessStatus: 200
 };
-
 app.use(helmet());
 app.use(compression());
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 app.use(passport.initialize());
 
+// Routes
 app.use('/auth', authRouter);
 app.use('/api', apiRouter);
 
@@ -90,7 +89,9 @@ io.use((socket: Socket, next) => {
 })
 .on('connection', (socket: Socket) => {
     const myId = socket.data._id as string;
-    console.log(`User ${socket.data.first_name} ${socket.data.last_name} connected.`);
+    const first_name: string = socket.data.first_name;
+    const last_name: string = socket.data.last_name;
+    // console.log(`User ${first_name} ${last_name} connected.`);
 
     socket.on('join room', async (roomId: string) => {
         if(socket.rooms.size > 1){
@@ -101,9 +102,8 @@ io.use((socket: Socket, next) => {
         await socket.join(roomId);
     });
 
-    socket.on('private message', async (text: string, roomId: string, userId: string) => {
+    socket.on('private message', async (text: string, roomId: string) => {
         const message = new Message({
-            toUser: new Types.ObjectId(userId),
             fromUser: new Types.ObjectId(myId),
             message: text,
         });
@@ -117,13 +117,15 @@ io.use((socket: Socket, next) => {
         // send event to frontend to display real-time message
         socket.to(roomId).emit('display message', {
             message: text,
-            from: myId,
+            fromId: myId,
+            fromName: `${first_name} ${last_name}`
         });
     }); 
 }); 
 
+// Start server
 httpServer.listen(port, () => {
-    console.log(`[server]: Server running at http://localhost:${port}`);
+    console.log(`Server started on port ${port}`);
 });
 
 export default app;

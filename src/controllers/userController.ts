@@ -69,7 +69,7 @@ export const fetch_users = [
         // returns all users minus current user
         const users = await User
             .find({ email: { $nin: user.email} })
-            .select({ password: 0, refreshTokens: 0 });
+            .select({ email: 0, password: 0, refreshTokens: 0 });
 
         res.status(200).json({
             success: true,

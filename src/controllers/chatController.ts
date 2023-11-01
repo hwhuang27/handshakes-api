@@ -12,7 +12,6 @@ export const fetch_chat = [
         const myId = new Types.ObjectId(user._id);
         const userId = new Types.ObjectId(req.params.userId);
 
-        // fetch existing room
         const room = await Room
             .findOne({ users: [myId, userId]})
             .populate({
@@ -21,21 +20,23 @@ export const fetch_chat = [
             })
             .populate({
                 path: 'messages',
+                select: ["fromUser", "message", "timestamp"],
             });
-
-        // make a new room if none exists
+            
         if(!room){
+            // make new room if no room exists
             const newRoom = new Room({
                 users: [myId, userId],
                 messages: [],
             });
             await newRoom.save();
+
             res.status(200).json({
                 success: true,
                 message: `created new chat with user id: ${req.params.userId}`,
-                newRoom
             });
         } else{
+            // return room object if room exists
             res.status(200).json({
                 success: true,
                 message: `fetched chat with user id: ${req.params.userId}`,
