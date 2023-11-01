@@ -93,14 +93,12 @@ io.use((socket, next) => {
     const myId = socket.data._id;
     console.log(`User ${socket.data.first_name} ${socket.data.last_name} connected.`);
 
-    // hit a certain endpoint in client-side to join room with roomId
     socket.on('join room', (roomId) => {
         if(socket.rooms.size > 1){
-            // change socket.rooms from Set to Array and grab the 2nd element
+            // change socket.rooms from Set to Array and grab 2nd element (current room)
             const prevRoomId = [...socket.rooms][1];
             socket.leave(prevRoomId);
         }
-
         socket.join(roomId);
     });
 
@@ -117,17 +115,12 @@ io.use((socket, next) => {
             { $push: { messages: message }},
         );
 
-        // send data to frontend to display real-time message
+        // send event to frontend to display real-time message
         socket.to(roomId).emit('display message', {
             message: text,
             from: myId,
         });
-    });
-    
-    // socket.onAny((eventName, ...args) => {
-    //     console.log(`Event name: ${eventName}`);
-    //     console.log(`Arguments: ${args}`);
-    // });
+    }); 
 }); 
 
 httpServer.listen(port, () => {
