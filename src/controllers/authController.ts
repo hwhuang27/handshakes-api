@@ -17,11 +17,11 @@ import {
 } from '../auth/jwtConfig';
 
 export function generateAccessToken(payload: jwtEncoded) {
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '15m' });
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '1d' });
 }
 
 export function generateRefreshToken(payload: jwtEncoded) {
-    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '14d' });
+    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '30d' });
 }
 
 export const login = [
