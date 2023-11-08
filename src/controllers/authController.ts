@@ -17,12 +17,11 @@ import {
 } from '../auth/jwtConfig';
 
 export function generateAccessToken(payload: jwtEncoded) {
-    // change this for production pls
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '7d' });
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '15m' });
 }
 
 export function generateRefreshToken(payload: jwtEncoded) {
-    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '30d' });
+    return jwt.sign(payload, REFRESH_TOKEN_KEY!, { expiresIn: '14d' });
 }
 
 export const login = [

@@ -89,8 +89,6 @@ io.use((socket: Socket, next) => {
 })
 .on('connection', (socket: Socket) => {
     const myId = socket.data._id as string;
-    const first_name: string = socket.data.first_name;
-    const last_name: string = socket.data.last_name;
     // console.log(`User ${first_name} ${last_name} connected.`);
 
     socket.on('join room', async (roomId: string) => {
@@ -114,6 +112,8 @@ io.use((socket: Socket, next) => {
             { $push: { messages: message }},
         );
 
+        const first_name: string = socket.data.first_name;
+        const last_name: string = socket.data.last_name;
         // send event to frontend to display real-time message
         socket.to(roomId).emit('display message', {
             message: text,
