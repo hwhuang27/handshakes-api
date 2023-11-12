@@ -187,6 +187,7 @@ export const register = [
                         password: hash,
                         first_name: req.body.first_name,
                         last_name: req.body.last_name,
+                        avatar: req.body.avatar,
                     });
                     await user.save();
 
