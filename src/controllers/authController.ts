@@ -71,7 +71,7 @@ export const logout = [
             { refreshTokens: refreshToken },
             { $pull: { refreshTokens: refreshToken } }
         );
-        res.clearCookie('jwt', cookieOptions);
+        res.cookie('jwt', 'none', cookieOptions);
 
         res.json({
             success: true,
