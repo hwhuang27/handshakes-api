@@ -64,6 +64,7 @@ export const login = [
 export const logout = [
     asyncHandler(async (req, res, _next) => {
         const refreshToken = req.cookies.jwt;
+        console.log(refreshToken);
 
         // remove token from database & clear cookies
         await User.findOneAndUpdate(
