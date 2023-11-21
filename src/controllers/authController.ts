@@ -17,7 +17,7 @@ import {
 } from '../auth/jwtConfig';
 
 export function generateAccessToken(payload: jwtEncoded) {
-    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '1d' });
+    return jwt.sign(payload, ACCESS_TOKEN_KEY!, { expiresIn: '2m' });
 }
 
 export function generateRefreshToken(payload: jwtEncoded) {
