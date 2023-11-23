@@ -23,7 +23,6 @@ export const fetch_chat = [
                 select: ["fromUser", "message", "timestamp"],
             });
         
-        console.log(room);
         if(!room){
             // make new room if no room exists
             const newRoom = new Room({
