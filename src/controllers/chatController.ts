@@ -13,7 +13,7 @@ export const fetch_chat = [
         const userId = new Types.ObjectId(req.params.userId);
 
         const room = await Room
-            .findOne({ users: [myId, userId]})
+            .findOne({ users: { $all: [myId, userId]} })
             .populate({
                 path: 'users',
                 select: ["first_name", "last_name", "avatar"],
@@ -22,7 +22,8 @@ export const fetch_chat = [
                 path: 'messages',
                 select: ["fromUser", "message", "timestamp"],
             });
-            
+        
+        console.log(room);
         if(!room){
             // make new room if no room exists
             const newRoom = new Room({
