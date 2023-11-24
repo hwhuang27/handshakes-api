@@ -8,12 +8,17 @@ const router = express.Router();
 // fetch current user info
 router.get('/user', 
     passport.authenticate('jwt', { session: false }),
-    userController.fetch_user);
+    userController.fetch_self);
 
 // edit current user info
 router.put('/user',
     passport.authenticate('jwt', { session: false }),
-    userController.edit_user);
+    userController.edit_self);
+
+// fetch specific user
+router.get('/user/:userId',
+    passport.authenticate('jwt', { session: false }),
+    userController.fetch_user);
 
 // get all users (minus current user)
 router.get('/users', 

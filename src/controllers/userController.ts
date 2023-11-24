@@ -6,7 +6,7 @@ dotenv.config();
 import { jwtEncoded, jwtDecoded } from '../auth/jwtConfig';
 import User from '../models/User';
 
-export const fetch_user = [
+export const fetch_self = [
     asyncHandler((req, res, _next) => {
         const user = req.user as jwtDecoded;
 
@@ -24,7 +24,7 @@ export const fetch_user = [
     })
 ];
 
-export const edit_user = [
+export const edit_self = [
     body("first_name")
         .trim()
         .isLength({ min: 1 })
@@ -59,6 +59,21 @@ export const edit_user = [
                 message: `User updated successfully.`
             });
         }
+    })
+];
+export const fetch_user = [
+    asyncHandler(async (req, res, _next) => {
+        const userId = req.params.userId;
+
+        // returns specified user
+        const user = await User
+            .find({ _id: { $in: userId } })
+            .select({ email: 0, password: 0, refreshTokens: 0 });
+
+        res.status(200).json({
+            success: true,
+            user
+        });
     })
 ];
 
