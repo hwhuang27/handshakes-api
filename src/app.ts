@@ -22,8 +22,8 @@ import { Types } from 'mongoose';
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-    cors: {
-        origin: "http://localhost:5173"
+    cors: { 
+        origin: ['http://localhost:5173', 'http://localhost:3000'],
     }
 });
 
@@ -45,7 +45,7 @@ async function main() {
 
 // Middleware
 const corsOptions = {
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'https://messenger-client-liard.vercel.app'],
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
     optionsSuccessStatus: 200
 };
 app.use(helmet());
