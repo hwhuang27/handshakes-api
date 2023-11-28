@@ -34,13 +34,14 @@ export const fetch_chat = [
             res.status(200).json({
                 success: true,
                 message: `created new chat with user id: ${req.params.userId}`,
+                room: newRoom,
             });
         } else{
             // return room object if room exists
             res.status(200).json({
                 success: true,
                 message: `fetched chat with user id: ${req.params.userId}`,
-                room
+                room: room,
             });
         }
     })
