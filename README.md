@@ -1,7 +1,6 @@
 # 💬 Messenger💬
 
-REST API 
-A real-time messaging app created with Socket.io
+REST API for the Messenger client.
 
 [Live site on GitHub Pages.](https://hwhuang27.github.io/messenger-client/)
 
