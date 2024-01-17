@@ -1,10 +1,10 @@
-# 💬 Messenger💬
+# 🤝 Handshakes 🤝
 
-REST API for the Messenger client.
+REST API for the Handshakes client
 
-[Live site on GitHub Pages.](https://hwhuang27.github.io/messenger-client/)
+[Live site on GitHub Pages.](https://hwhuang27.github.io/handshakes-client/)
 
-[Frontend client repo can be found here.](https://github.com/hwhuang27/messenger-client)
+[Frontend client repo can be found here.](https://github.com/hwhuang27/handshakes-client)
 
 ## 🛠️ Built with... 🛠️
 
@@ -18,10 +18,8 @@ REST API for the Messenger client.
 
 ## 📷 Screenshots 📷
 
-![Chat](https://raw.githubusercontent.com/hwhuang27/messenger-client/main/public/screenshots/chat.png)
+![Chat](https://raw.githubusercontent.com/hwhuang27/handshakes-client/main/public/screenshots/chat.png)
 
-![Login](https://raw.githubusercontent.com/hwhuang27/messenger-client/main/public/screenshots/login.png)
+![Login](https://raw.githubusercontent.com/hwhuang27/handshakes-client/main/public/screenshots/login.png)
 
-![Register](https://raw.githubusercontent.com/hwhuang27/messenger-client/main/public/screenshots/register.png)
-
-![EditProfile](https://raw.githubusercontent.com/hwhuang27/messenger-client/main/public/screenshots/profile.png)
+![Register](https://raw.githubusercontent.com/hwhuang27/handshakes-client/main/public/screenshots/register.png)
